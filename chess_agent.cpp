@@ -1,10 +1,12 @@
-#include <bits/stdc++.h>
+#include <iostream>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <stdint.h>
 
 #define MAX_MOVES 256
 #define INFINITY 1000000
 #define MAX_DEPTH 5
-
-using namespace std;
 
 const int PEICE_VALUES[7] = {
     0, // Empty
@@ -124,7 +126,7 @@ int generate_moves(Board *board, Move *moves){
                         }
 
                         // Move Type-2 (Captures + En Passant)
-                        int capture_dirs = {-1, 1};
+                        int capture_dirs[] = {-1, 1};
                         for(auto capture_dir : capture_dirs){
                             end = start + direction + capture_dir;
                             if(end>=0 && end<64 && (end%8 != 7 || capture_dir != -side) &&(end %8 == 0 || capture_dir != side)){
@@ -294,14 +296,14 @@ void apply_move(Board *board, Move *move){
     }
 
     // Handle Castling_rights
-    if (move->piece == W_KING) {
+    if (move->peice == W_KING) {
         board->castling_rights &= ~0x3; // Clear white castling rights
-    } else if (move->piece == B_KING) {
+    } else if (move->peice == B_KING) {
         board->castling_rights &= ~0xC; // Clear black castling rights
-    } else if (move->piece == W_ROOK) {
+    } else if (move->peice == W_ROOK) {
         if (move->from == 7) board->castling_rights &= ~0x1; // H1 rook moved
         else if (move->from == 0) board->castling_rights &= ~0x2; // A1 rook moved
-    } else if (move->piece == B_ROOK) {
+    } else if (move->peice == B_ROOK) {
         if (move->from == 63) board->castling_rights &= ~0x4; // H8 rook moved
         else if (move->from == 56) board->castling_rights &= ~0x8; // A8 rook moved
     }
@@ -323,7 +325,7 @@ void apply_move(Board *board, Move *move){
     board->to_move = - board->to_move;
 
     //Update Halfmove Clock
-    if(move->piece == W_PAWN || move->piece == B_PAWN || move->captured != EMPTY){
+    if(move->peice == W_PAWN || move->peice == B_PAWN || move->captured != EMPTY){
         board->halfmove_clock = 0;
     }
     else{
@@ -345,7 +347,7 @@ void undo_move(Board *board, Move *move){
 
     // Rest is en_passant capture
     if(move->is_en_passant){
-        int captures_pawn_pos = move->to + (board->to_move == 1) ? 8 : -8;
+        int captures_pawn_pos = move->to + ((board->to_move == 1) ? 8 : -8);
         board->squares[captures_pawn_pos] = (board->to_move == 1) ? B_PAWN : W_PAWN;
     }
 
@@ -507,6 +509,7 @@ const char *choose_best_move(Board *board, double per_move_time, double total_ti
     Move best_move = moves[0];
     int best_score = -INFINITY;
 
+    int depth = 1;
     while(depth <= MAX_DEPTH){
         if(clock() > end_time){
             break;
@@ -559,11 +562,5 @@ const char *choose_best_move(Board *board, double per_move_time, double total_ti
         notation_buffer[5] = '\0';
     }
     return notation_buffer;
-} 
-
-
-int main(){
-
-    return 0;
 }
 
